@@ -127,7 +127,7 @@ export default function Modal({
           ${className}
         `}
       >
-        {(title || onClose) && (
+        {title  && (
           <div className="flex items-center justify-between border-b px-5 py-4">
             <h2
               id="modal-title"
