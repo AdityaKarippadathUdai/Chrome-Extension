@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && BROWSER=chrome vite build && node scripts/fix-extension-paths.mjs dist-chrome",
+    "build:chrome": "tsc -b && BROWSER=chrome vite build && node scripts/fix-extension-paths.mjs dist-chrome",
+    "build:firefox": "tsc -b && BROWSER=firefox vite build && node scripts/fix-extension-paths.mjs dist-firefox",
+    "build:all": "npm run build:chrome && npm run build:firefox",
     "preview": "vite preview",
     "lint": "eslint ."
   },
@@ -14,15 +17,16 @@
     "lucide-react": "^0.542.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "webextension-polyfill": "^0.12.0",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
-    "@crxjs/vite-plugin": "^2.7.1",
     "@tailwindcss/vite": "^4.3.2",
     "@types/chrome": "^0.2.2",
     "@types/node": "^26.1.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "@types/webextension-polyfill": "^0.10.7",
     "@vitejs/plugin-react": "^5.2.0",
     "eslint": "^9.39.5",
     "tailwindcss": "^4.3.2",

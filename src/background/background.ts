@@ -1,25 +1,27 @@
 // src/background/background.ts
 
-/// <reference types="chrome"/>
-
 /**
- * Background Service Worker
+ * Background Service Worker (Chrome MV3) / Background Script (Firefox MV3)
+ *
+ * Uses webextension-polyfill so that `browser.*` works on both Chrome and Firefox.
  *
  * Responsibilities:
  * - Runs when the extension is installed or updated.
- * - Handles future messaging.
+ * - Handles runtime messages from popup / options pages.
  * - Opens links in new tabs.
  * - Initializes extension defaults.
  */
 
-chrome.runtime.onInstalled.addListener((details) => {
+import browser from "webextension-polyfill";
+
+browser.runtime.onInstalled.addListener((details) => {
   console.log("Link Library extension installed.");
 
   switch (details.reason) {
     case "install":
       console.log("First installation.");
 
-      chrome.storage.local.set({
+      browser.storage.local.set({
         initialized: true,
       });
 
@@ -29,75 +31,47 @@ chrome.runtime.onInstalled.addListener((details) => {
       console.log("Extension updated.");
       break;
 
-    case "chrome_update":
-      console.log("Chrome updated.");
+    // "browser_update" is the Firefox equivalent of "chrome_update"
+    case "browser_update":
+      console.log("Browser updated.");
       break;
   }
 });
 
 /**
- * Listen for messages from popup/options pages.
+ * Listen for messages from popup / options pages.
+ *
+ * Returning a Promise keeps the channel open for the async response.
+ * This pattern works in both Chrome MV3 and Firefox MV3.
  */
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  switch (message.type) {
-    case "OPEN_LINK": {
-      if (typeof message.url === "string") {
-        chrome.tabs.create({
-          url: message.url,
-        });
+browser.runtime.onMessage.addListener(
+  (
+    message: unknown,
+    _sender: browser.Runtime.MessageSender
+  ): Promise<unknown> => {
+    const msg = message as { type: string; url?: string };
 
-        sendResponse({
+    switch (msg.type) {
+      case "OPEN_LINK": {
+        if (typeof msg.url === "string") {
+          browser.tabs.create({ url: msg.url });
+          return Promise.resolve({ success: true });
+        }
+        return Promise.resolve({ success: false, error: "No URL provided." });
+      }
+
+      case "PING": {
+        return Promise.resolve({
           success: true,
+          message: "Background script is running.",
         });
       }
 
-      break;
+      default:
+        return Promise.resolve({
+          success: false,
+          error: "Unknown message type.",
+        });
     }
-
-    case "PING": {
-      sendResponse({
-        success: true,
-        message: "Background service worker is running.",
-      });
-
-      break;
-    }
-
-    default:
-      sendResponse({
-        success: false,
-        error: "Unknown message type.",
-      });
   }
-
-  return true;
-});
-
-/**
- * Handle toolbar icon click.
- *
- * Currently only logs.
- * Popup UI will open automatically because
- * popup is defined in manifest.json.
- */
-chrome.action.onClicked.addListener(() => {
-  console.log("Extension icon clicked.");
-});
-
-/**
- * Optional:
- * Open the Options page from anywhere.
- */
-export function openOptionsPage() {
-  chrome.runtime.openOptionsPage();
-}
-
-/**
- * Optional:
- * Open a URL in a new tab.
- */
-export function openLink(url: string) {
-  chrome.tabs.create({
-    url,
-  });
-}
+);

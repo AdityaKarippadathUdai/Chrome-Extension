@@ -24,7 +24,9 @@
 
     "useDefineForClassFields": true,
 
-    "moduleDetection": "force"
+    "moduleDetection": "force",
+
+    "types": ["chrome", "webextension-polyfill"]
   },
 
   "include": [
