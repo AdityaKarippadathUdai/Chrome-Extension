@@ -300,19 +300,15 @@ export default function Options() {
     url: string;
     description: string;
     tags: string[];
+    folderId: number;
+    favorite: boolean;
   }) {
-    if (selectedFolderId === null) {
-      alert(
-        "Please select a folder first."
-      );
-      return;
-    }
+    const { getFavicon } = await import("../utils/favicon");
+    const favicon = getFavicon(values.url);
 
     await createLink({
       ...values,
-      folderId: selectedFolderId,
-      favorite: false,
-      favicon: "",
+      favicon,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -327,10 +323,18 @@ export default function Options() {
     url: string;
     description: string;
     tags: string[];
+    folderId: number;
+    favorite: boolean;
   }) {
     if (editingLinkId === null) return;
 
-    await updateLink(editingLinkId, values);
+    const { getFavicon } = await import("../utils/favicon");
+    const favicon = getFavicon(values.url);
+
+    await updateLink(editingLinkId, {
+      ...values,
+      favicon,
+    });
     setEditingLinkId(null);
     setLinkModalOpen(false);
   }
@@ -526,6 +530,8 @@ export default function Options() {
             url: editingLink?.url ?? "",
             description: editingLink?.description ?? "",
             tags: editingLink?.tags ?? [],
+            folderId: editingLink?.folderId ?? selectedFolderId ?? undefined,
+            favorite: editingLink?.favorite ?? false,
           }}
           onCancel={() => {
             setLinkModalOpen(false);
