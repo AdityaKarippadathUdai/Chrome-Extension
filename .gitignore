@@ -2,3 +2,5 @@ node_modules/
 dist-chrome/
 dist-firefox/
 dist/
+dist-chrome.zip
+dist-firefox.zip
