@@ -4,3 +4,8 @@ dist-firefox/
 dist/
 dist-chrome.zip
 dist-firefox.zip
+dist-chrome.crx
+.gitignore
+dist-chrome.pem
+.gitignore
+link-library.xpi
